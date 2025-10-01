@@ -1,0 +1,8 @@
+streamlit>=1.36
+pandas>=2.0
+lida>=0.0.14
+llmx>=0.0.17
+openai>=1.0.0
+matplotlib>=3.7
+openpyxl>=3.1
+xlrd>=2.0
