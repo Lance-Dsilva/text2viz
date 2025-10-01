@@ -1,133 +1,110 @@
 import os
 import base64
 import tempfile
-
 import pandas as pd
 import streamlit as st
 
 # =========================
-# Page Config & Theme
+# Page Config
 # =========================
 st.set_page_config(
-    page_title="DataViz AI",
+    page_title="📊 DataViz AI",
     page_icon="📊",
     layout="wide",
 )
 
-# Global styles (mobile-first)
+# =========================
+# Custom Styles (mobile friendly, light UI)
+# =========================
 st.markdown("""
 <style>
-/* --- Base & layout --- */
-:root{
-  --brand:#2563eb; /* primary */
-  --brand-2:#7c3aed; /* accent */
-  --bg:#0b1220;     /* dark blue */
-  --card:#0f172a80; /* glass */
-  --text:#e5e7eb;   /* light */
-  --muted:#94a3b8;  /* muted */
+/* Global */
+html, body, .main {
+    background: linear-gradient(180deg, #f7faff 0%, #ffffff 100%) !important;
 }
-html, body, .main { background: radial-gradient(1200px 800px at 10% 0%, #141c2f 0%, #0b1220 45%, #0b1220 100%) !important; }
-.block-container { padding-top: 1.25rem; padding-bottom: 2rem; max-width: 1200px; }
+.block-container {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+    max-width: 1000px;
+}
 
-/* --- Hero --- */
+/* Hero Section */
 .hero {
-  border-radius: 18px;
-  background: linear-gradient(135deg, #1f2937aa, #0f172a66);
-  border: 1px solid #1f2a44;
-  padding: clamp(16px, 4vw, 28px);
-  color: var(--text);
-  box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
-  backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+    padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    text-align: center;
 }
-.hero h1{
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
-  font-size: clamp(22px, 4.2vw, 36px);
-  line-height: 1.15;
-  margin: 0 0 .35rem 0;
-  color: #f8fafc;
+.hero h1 {
+    font-size: clamp(24px, 4.2vw, 38px);
+    margin-bottom: .3rem;
+    color: #0f172a;
+    font-weight: 700;
 }
-.hero .sub{
-  color: var(--muted);
-  font-size: clamp(13px, 2.6vw, 16px);
-  margin: 0;
+.hero p {
+    font-size: clamp(14px, 2.8vw, 17px);
+    color: #334155;
+    margin-top: 0;
 }
 
-/* --- Cards --- */
+/* Cards */
 .card {
-  background: var(--card);
-  border: 1px solid #1f2a44;
-  border-radius: 16px;
-  padding: clamp(12px, 3.6vw, 18px);
-  color: var(--text);
-  box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  backdrop-filter: blur(8px);
-}
-.card h3{
-  margin: 0 0 .75rem 0;
-  font-size: clamp(16px, 2.8vw, 18px);
-  color: #e2e8f0;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    margin-top: 1rem;
 }
 
-/* --- Buttons --- */
+/* Buttons */
 .stButton>button {
-  width: 100%;
-  border: 0;
-  border-radius: 10px;
-  padding: .75rem 1rem;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(90deg, var(--brand), var(--brand-2));
-  box-shadow: 0 8px 20px rgba(37,99,235,.35);
+    width: 100%;
+    border-radius: 10px;
+    padding: .8rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    border: none;
+    box-shadow: 0 4px 10px rgba(37,99,235,0.4);
+    transition: transform .1s ease-in-out;
 }
-.stButton>button:hover { filter: brightness(1.05); transform: translateY(-1px); }
-
-/* --- Inputs --- */
-input[type="text"], .stTextInput>div>div>input {
-  border-radius: 10px !important;
-  background: #0b1328 !important;
-  color: var(--text) !important;
-  border: 1px solid #1e293b !important;
+.stButton>button:hover {
+    transform: translateY(-2px);
 }
 
-/* --- Dataframe --- */
+/* Dataframe */
 [data-testid="stDataFrame"] {
-  background: #0b1328 !important;
-  border-radius: 10px;
-  border: 1px solid #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
 }
 
-/* --- Image --- */
-img { border-radius: 12px; border: 1px solid #1f2a44; }
-
-/* --- Badges --- */
-.badges {
-  display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.5rem
-}
-.badge {
-  background: #0b1328; color:#cbd5e1; border:1px solid #1f2a44; border-radius:999px;
-  padding:.25rem .6rem; font-size:.8rem
+/* Expander */
+.streamlit-expanderHeader {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
 }
 
-/* --- Footer --- */
+/* Footer */
 .footer {
-  color:#94a3b8; font-size:.85rem; margin-top: 1.25rem; text-align:center
-}
-
-/* Mobile tweaks */
-@media (max-width: 640px){
-  .block-container { padding-left: .8rem; padding-right: .8rem; }
+    text-align: center;
+    margin-top: 2rem;
+    color: #64748b;
+    font-size: .9rem;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# Secret handling (Cloud + local)
+# Set API key from secrets
 # =========================
-if "OPENAI_API_KEY" in st.secrets and st.secrets["OPENAI_API_KEY"]:
+if "OPENAI_API_KEY" in st.secrets:
     os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
 # =========================
-# LIDA + OpenAI imports
+# Imports for LIDA
 # =========================
 LIDA_READY = True
 try:
@@ -137,160 +114,132 @@ except Exception as e:
     LIDA_READY = False
     INIT_ERROR = e
 
+
 # =========================
-# LIDA helpers
+# LIDA Helpers
 # =========================
-def run_lida_once(manager: "Manager", csv_path: str, user_goal: str):
-    """Single attempt (Matplotlib). Returns (raster, code)."""
+def run_lida_once(manager, csv_path, user_goal):
     summary = manager.summarize(csv_path)
     goal = {
         "question": user_goal,
         "visualization": (
-            "Generate one Matplotlib visualization that answers the question. "
-            "If needed, transform data (filter, groupby, aggregation, resample weekly/monthly/quarterly)."
+            "Generate a single Matplotlib visualization that answers the question. "
+            "If necessary, perform data transformations (groupby, filtering, aggregation, resampling weekly/monthly/quarterly)."
         ),
-        "rationale": "Briefly justify the chart and any transformations."
+        "rationale": "Briefly justify the visualization and transformations."
     }
     charts = manager.visualize(summary=summary, goal=goal, library="matplotlib")
     if not charts:
         return None, ""
-    c = charts[0]
-    return getattr(c, "raster", None), getattr(c, "code", "")
+    chart = charts[0]
+    return getattr(chart, "raster", None), getattr(chart, "code", "")
 
-def run_lida(csv_path: str, prompt: str):
-    """Two attempts to maximize success."""
+def run_lida(csv_path, prompt):
     manager = Manager(text_gen=llm("openai", model="gpt-4o-mini"))
-    r, code = run_lida_once(manager, csv_path, prompt)
-    if r is not None:
-        return r, code, "primary"
-    guided = f"{prompt}. Perform any required transformations first, then render a single clear Matplotlib chart."
-    r, code = run_lida_once(manager, csv_path, guided)
-    return r, code, ("fallback" if r is not None else "none")
+    raster, code = run_lida_once(manager, csv_path, prompt)
+    if raster is not None:
+        return raster, code, "primary"
+    guided = f"{prompt}. Perform required transformations first, then plot a clear Matplotlib chart."
+    raster, code = run_lida_once(manager, csv_path, guided)
+    return raster, code, ("fallback" if raster is not None else "none")
 
 def decode_raster(raster):
-    """Accept bytes or base64 string."""
-    if raster is None: return None
-    if isinstance(raster, bytes): return raster
+    if raster is None:
+        return None
+    if isinstance(raster, bytes):
+        return raster
     if isinstance(raster, str):
-        try: return base64.b64decode(raster)
-        except Exception: return None
+        try:
+            return base64.b64decode(raster)
+        except Exception:
+            return None
     return None
 
+
 # =========================
-# Hero / Header
+# Hero Section
 # =========================
 st.markdown("""
 <div class="hero">
-  <h1>DataViz AI</h1>
-  <p class="sub">Upload data → Ask in plain English → Get a clean chart. Powered by LIDA + OpenAI (Matplotlib).</p>
-  <div class="badges">
-    <span class="badge">LIDA</span>
-    <span class="badge">OpenAI gpt-4o-mini</span>
-    <span class="badge">Matplotlib</span>
-    <span class="badge">CSV / Excel</span>
-  </div>
+    <h1>📊 DataViz AI</h1>
+    <p>Upload a CSV or Excel → Ask a question → Get a ready-to-use chart generated by AI.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
-# Guards
-# =========================
 if not LIDA_READY:
-    st.error("LIDA not available. Install:")
+    st.error("❌ LIDA is not installed. Run:")
     st.code("pip install lida llmx openai", language="bash")
-    st.exception(INIT_ERROR)
     st.stop()
 
-if not os.environ.get("OPENAI_API_KEY"):
-    st.warning("Add your `OPENAI_API_KEY` in Streamlit Cloud → Settings → Secrets.")
-    # Do not stop; allow UI exploration
-
 # =========================
-# Input Row (compact, minimal text)
+# Upload + Input
 # =========================
-left, right = st.columns([1,1], vertical_alignment="bottom")
+with st.container():
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    uploaded = st.file_uploader("📤 Upload CSV or Excel file", type=["csv", "xlsx", "xls"])
+    sheet = None
+    if uploaded and uploaded.name.lower().endswith((".xlsx", ".xls")):
+        try:
+            xls = pd.ExcelFile(uploaded)
+            sheet = st.selectbox("Select sheet", options=xls.sheet_names, index=0)
+            uploaded.seek(0)
+        except Exception:
+            pass
+    st.markdown("</div>", unsafe_allow_html=True)
 
-with left:
-    up_card = st.container()
-    with up_card:
-        st.markdown('<div class="card"><h3>📤 Upload</h3>', unsafe_allow_html=True)
-        uploaded = st.file_uploader("CSV / Excel", type=["csv","xlsx","xls"], label_visibility="collapsed")
-        sheet = None
-        if uploaded is not None and uploaded.name.lower().endswith((".xlsx",".xls")):
-            try:
-                xls = pd.ExcelFile(uploaded)
-                sheet = st.selectbox("Sheet", options=xls.sheet_names, index=0, label_visibility="collapsed")
-                uploaded.seek(0)
-            except Exception:
-                pass
-        st.markdown('</div>', unsafe_allow_html=True)
+with st.container():
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    prompt = st.text_input("❓ What do you want to visualize?", placeholder="e.g., Monthly revenue trend by region")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-with right:
-    q_card = st.container()
-    with q_card:
-        st.markdown('<div class="card"><h3>❓ Question</h3>', unsafe_allow_html=True)
-        prompt = st.text_input(
-            "Ask",
-            placeholder="e.g., Weekly revenue trend by region",
-            label_visibility="collapsed",
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# CTA
 can_generate = uploaded is not None and prompt.strip() != ""
-cta_col = st.container()
-with cta_col:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    gen_clicked = st.button("🚀 Generate Visualization", disabled=not can_generate)
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+generate = st.button("🚀 Generate Visualization", disabled=not can_generate)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
-# Result
+# Output
 # =========================
-if gen_clicked:
+if generate:
     try:
-        # Load df
         if uploaded.name.lower().endswith(".csv"):
             df = pd.read_csv(uploaded)
         else:
             df = pd.read_excel(uploaded, sheet_name=sheet if sheet else 0)
 
         if df.empty:
-            st.error("File is empty. Try a different dataset.")
+            st.warning("⚠️ File seems empty. Try another dataset.")
+            st.stop()
+
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.subheader("📊 Data Preview")
+        st.dataframe(df.head(10), use_container_width=True)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
+            df.to_csv(tmp.name, index=False)
+            csv_path = tmp.name
+
+        with st.spinner("🤖 Generating visualization with GPT-4o-mini..."):
+            raster, code, attempt = run_lida(csv_path, prompt)
+
+        os.unlink(csv_path)
+        raster_bytes = decode_raster(raster)
+
+        st.subheader("📈 Visualization")
+        if raster_bytes is not None:
+            st.image(raster_bytes, caption=f"LIDA Visualization ({attempt} attempt)", use_container_width=True)
+            with st.expander("🧠 View Generated Code"):
+                st.code(code or "# No code returned", language="python")
+            st.success("✅ Visualization generated successfully!")
         else:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.markdown("### 📊 Preview")
-            st.dataframe(df.head(10), use_container_width=True)
+            st.error("❌ Could not generate visualization. Try rephrasing the question or using a dataset with numeric columns.")
 
-            # Temp CSV for LIDA
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
-                df.to_csv(tmp.name, index=False)
-                csv_path = tmp.name
-
-            with st.spinner("Generating chart…"):
-                raster, code, attempt = run_lida(csv_path, prompt)
-
-            # Cleanup
-            try: os.unlink(csv_path)
-            except Exception: pass
-
-            raster_bytes = decode_raster(raster)
-
-            st.markdown("### 📈 Visualization")
-            if raster_bytes is not None:
-                st.image(raster_bytes, caption=f"LIDA ({attempt})", use_container_width=True)
-                with st.expander("View generated Matplotlib code"):
-                    st.code(code or "# No code returned", language="python")
-                st.success("Done.")
-            else:
-                st.error("Couldn’t generate an image. Try a clearer question or a dataset with numeric columns.")
-
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"⚠️ Error: {e}")
 
 # =========================
-# Footer (minimal)
+# Footer
 # =========================
-st.markdown('<div class="footer">© DataViz AI — built with LIDA + OpenAI • Optimized for mobile</div>', unsafe_allow_html=True)
+st.markdown("<div class='footer'>Made with ❤️ using LIDA + GPT-4o-mini • Mobile optimized</div>", unsafe_allow_html=True)
