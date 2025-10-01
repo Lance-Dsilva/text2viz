@@ -2,6 +2,46 @@ import streamlit as st
 import pandas as pd
 import tempfile, os, base64
 
+# ======= CONFIG & STYLE =======
+st.set_page_config(
+    page_title="DataViz AI 📊 | Natural Language → Visualization",
+    page_icon="📊",
+    layout="wide"
+)
+
+# Custom CSS styling for a professional look
+st.markdown("""
+<style>
+    .main {
+        background-color: #f9fafb;
+        padding: 1.5rem;
+    }
+    h1, h2, h3, h4 {
+        font-family: 'Segoe UI', sans-serif;
+        color: #2c3e50;
+    }
+    .stButton>button {
+        background: linear-gradient(90deg, #2563eb, #1d4ed8);
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        border: none;
+    }
+    .stButton>button:hover {
+        background: linear-gradient(90deg, #1d4ed8, #1e40af);
+    }
+    .result-card {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        margin-top: 1.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ---- LIDA + OpenAI imports ----
 LIDA_READY = True
 try:
@@ -14,10 +54,7 @@ except Exception as e:
 
 # ======== LIDA Helpers =========
 def run_lida_once(manager: "Manager", csv_path: str, user_goal: str):
-    """
-    Try generating a visualization once using Matplotlib.
-    Returns (raster_image, code_str).
-    """
+    """Try generating a visualization once using Matplotlib."""
     summary = manager.summarize(csv_path)
 
     goal = {
@@ -39,9 +76,7 @@ def run_lida_once(manager: "Manager", csv_path: str, user_goal: str):
 
 
 def run_lida_with_fallbacks(csv_path: str, user_prompt: str) -> tuple:
-    """
-    Try up to 2 attempts to ensure a visualization is returned.
-    """
+    """Try up to 2 attempts to ensure a visualization is returned."""
     manager = Manager(text_gen=llm("openai", model="gpt-4o-mini"))
 
     # Attempt 1
@@ -58,9 +93,7 @@ def run_lida_with_fallbacks(csv_path: str, user_prompt: str) -> tuple:
 
 
 def decode_raster(raster):
-    """
-    Handle raster returned as base64 string or raw bytes.
-    """
+    """Handle raster returned as base64 string or raw bytes."""
     if raster is None:
         return None
     if isinstance(raster, bytes):
@@ -73,21 +106,27 @@ def decode_raster(raster):
     return None
 
 
-# ======== Streamlit UI =========
+# ======== SIDEBAR =========
+st.sidebar.title("⚙️ Settings")
+st.sidebar.info(
+    "🔑 Make sure you’ve set your `OPENAI_API_KEY` as a Streamlit secret.\n\n"
+    "💡 Tip: Use a dataset with numeric and categorical columns for the best results."
+)
 
-st.set_page_config(page_title="📊 Text → Visualization (LIDA + Matplotlib)", layout="wide")
-st.title("📊 Text → Visualization (LIDA + Matplotlib)")
+st.sidebar.markdown("📂 [Upload sample dataset](https://share.streamlit.io)")
 
+# ======== HEADER =========
+st.title("📊 DataViz AI — Natural Language to Visualization")
+st.caption(
+    "Upload a dataset, ask a question in plain English, and let AI generate the visualization with **Matplotlib + GPT-4o-mini** automatically."
+)
+
+# ======== MAIN APP =========
 if not LIDA_READY:
     st.error("❌ LIDA is not available. Install with:")
     st.code("pip install lida llmx openai", language="bash")
     st.exception(INIT_ERROR)
     st.stop()
-
-st.write(
-    "Upload a dataset, type your question (e.g., `weekly revenue`, `sales by region`, `average profit by month`), "
-    "and click **Generate Visualization**. LIDA will use OpenAI's `gpt-4o-mini` to generate Matplotlib code automatically."
-)
 
 # Upload section
 uploaded = st.file_uploader("📤 Upload CSV or Excel file", type=["csv", "xlsx", "xls"])
@@ -105,7 +144,7 @@ prompt = st.text_input("❓ What visualization would you like to see?", placehol
 
 # Enable button only if both inputs exist
 can_generate = uploaded is not None and prompt.strip() != ""
-gen_clicked = st.button("🚀 Generate Visualization", type="primary", disabled=not can_generate)
+gen_clicked = st.button("🚀 Generate Visualization", disabled=not can_generate)
 
 if gen_clicked:
     try:
@@ -141,15 +180,18 @@ if gen_clicked:
 
         # Display results
         if raster_bytes is not None:
+            st.markdown("<div class='result-card'>", unsafe_allow_html=True)
             st.subheader("📈 Generated Visualization")
             st.image(raster_bytes, caption=f"LIDA Visualization ({attempt} attempt)", use_container_width=True)
 
             with st.expander("🧠 View Generated Matplotlib Code"):
                 st.code(code or "# No code returned", language="python")
 
-            st.caption("✅ Visualization generated using LIDA + OpenAI (`gpt-4o-mini`) with Matplotlib.")
+            st.success("✅ Visualization generated successfully using LIDA + OpenAI (`gpt-4o-mini`).")
+            st.markdown("</div>", unsafe_allow_html=True)
+
         else:
-            st.error("❌ LIDA could not generate a visualization image. Try rephrasing your question or using a different dataset.")
+            st.error("❌ LIDA could not generate a visualization. Try rephrasing your question or using a dataset with numeric columns.")
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
